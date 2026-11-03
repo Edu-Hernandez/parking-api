@@ -43,6 +43,20 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
     
+    // Antes de crear un registro
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+    
+    // Antes de actualizar un registro
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = Instant.now();
+    }
+    
     //constructor vacío requerido por JPA
     public User() {}
     
