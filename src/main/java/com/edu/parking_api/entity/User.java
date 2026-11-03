@@ -6,7 +6,13 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_user_email",
+            columnNames = "email"
+        )
+    })
 public class User {
     
     @Id

@@ -2,6 +2,7 @@ package com.edu.parking_api.service;
 
 import com.edu.parking_api.dto.CreateUserRequest;
 import com.edu.parking_api.entity.User;
+import com.edu.parking_api.exception.BusinessException;
 import com.edu.parking_api.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,10 @@ public class UserService {
     }
     
     public User createUser(CreateUserRequest request) {
+        
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException("El correo electrónico ya está registrado");
+        }
         
         User user = new User();
         
