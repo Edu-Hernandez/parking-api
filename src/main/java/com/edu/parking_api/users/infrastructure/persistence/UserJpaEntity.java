@@ -1,4 +1,4 @@
-package com.edu.parking_api.entity;
+package com.edu.parking_api.users.infrastructure.persistence;
 
 import jakarta.persistence.*;
 
@@ -11,20 +11,24 @@ import java.util.UUID;
         @UniqueConstraint(
             name = "uk_user_email",
             columnNames = "email"
+        ),
+        @UniqueConstraint(
+            name = "uk_user_document",
+            columnNames = {"document_type", "document_number"}
         )
     })
-public class User {
-    
+public class UserJpaEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
+
     @Column(name = "document_type", nullable = false, length = 20)
     private String documentType;
-    
+
     @Column(name = "document_number", length = 20)
     private String documentNumber;
-    
+
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
@@ -48,111 +52,106 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-    
-    // Antes de crear un registro
+
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
-    
-    // Antes de actualizar un registro
+
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = Instant.now();
     }
-    
-    //constructor vacío requerido por JPA
-    public User() {}
-    
-    //getters
-    public UUID getId(){
+
+    protected UserJpaEntity() {}
+
+    public UUID getId() {
         return id;
     }
-    
-    public String getDocumentType(){
-        return documentType;
-    }
-    
-    public String getDocumentNumber(){
-        return documentNumber;
-    }
-    
-    public String getFirstName(){
-        return firstName;
-    }
-    
-    public String getLastName(){
-        return lastName;
-    }
-    
-    public String getEmail(){
-        return email;
-    }
-    
-    public String getPasswordHash(){
-        return passwordHash;
-    }
-    
-    public String getPhone(){
-        return phone;
-    }
-    
-    public Boolean getIsActive(){
-        return isActive;
-    }
-    
-    public Instant getCreatedAt(){
-        return createdAt;
-    }
-    
-    public Instant getUpdatedAt(){
-        return updatedAt;
-    }
-    
-    //setters
-    public void setId(UUID id){
+
+    public void setId(UUID id) {
         this.id = id;
     }
-    
-    public void setDocumentType(String documentType){
+
+    public String getDocumentType() {
+        return documentType;
+    }
+
+    public void setDocumentType(String documentType) {
         this.documentType = documentType;
     }
-    
-    public void setDocumentNumber(String documentNumber){
+
+    public String getDocumentNumber() {
+        return documentNumber;
+    }
+
+    public void setDocumentNumber(String documentNumber) {
         this.documentNumber = documentNumber;
     }
-    
-    public void setFirstName(String firstName){
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
-    
-    public void setLastName(String lastName){
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
         this.lastName = lastName;
     }
-    
-    public void setEmail(String email){
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
         this.email = email;
     }
-    
-    public void setPasswordHash(String passwordHash){
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
-    
-    public void setPhone(String phone){
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
         this.phone = phone;
     }
-    
-    public void setIsActive(Boolean isActive){
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
-    
-    public void setCreatedAt(Instant createdAt){
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
-    
-    public void setUpdatedAt(Instant updatedAt){
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
 }
