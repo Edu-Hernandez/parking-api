@@ -3,6 +3,7 @@ package com.edu.parking_api.users.application;
 import com.edu.parking_api.exception.BusinessException;
 import com.edu.parking_api.users.application.dto.CreateUserCommand;
 import com.edu.parking_api.users.domain.model.User;
+import com.edu.parking_api.users.domain.normalizer.EmailNormalizer;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,9 @@ public class CreateUserUseCase {
     }
 
     public User execute(CreateUserCommand command) {
-        if (userRepository.existsByEmail(command.email())) {
+        
+        String email = EmailNormalizer.normalize(command.email());
+        if (userRepository.existsByEmail(email)) {
             throw new BusinessException("El correo electrónico ya está registrado");
         }
 
@@ -35,7 +38,7 @@ public class CreateUserUseCase {
                 command.documentNumber(),
                 command.firstName(),
                 command.lastName(),
-                command.email(),
+                email,
                 command.phone(),
                 passwordHash
         );

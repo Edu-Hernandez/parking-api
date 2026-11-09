@@ -150,6 +150,13 @@ En `application.properties`, `spring.jpa.hibernate.ddl-auto` pasa de `update` a 
 
 Si se dejara `update` junto con Flyway, los dos intentarían tocar el mismo esquema: Flyway con los `.sql` e Hibernate por su cuenta. Con `validate`, solo Flyway cambia las tablas.
 
+### Estructura del proyecto
+```bash
+nameController → CreatenameUseCase → NameRepository (puerto)
+                                          ↑
+                              NameRepositoryAdapter → NameJpaRepository → BD
+```
+
 ### Carpetas
 
 Dentro de `src/main/resources/`:
