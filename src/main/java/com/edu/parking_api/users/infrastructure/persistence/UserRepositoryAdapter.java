@@ -1,8 +1,11 @@
 package com.edu.parking_api.users.infrastructure.persistence;
 
 import com.edu.parking_api.users.domain.model.User;
+import com.edu.parking_api.users.domain.normalizer.EmailNormalizer;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
 
 @Repository
 public class UserRepositoryAdapter implements UserRepository {
@@ -18,6 +21,13 @@ public class UserRepositoryAdapter implements UserRepository {
         UserJpaEntity entity = UserPersistenceMapper.toJpaEntity(user);
         UserJpaEntity saved = userJpaRepository.save(entity);
         return UserPersistenceMapper.toDomain(saved);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userJpaRepository
+                .findByEmail(EmailNormalizer.normalize(email))
+                .map(UserPersistenceMapper::toDomain);
     }
 
     @Override
