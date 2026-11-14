@@ -1,6 +1,10 @@
 package com.edu.parking_api.auth.infrastructure.jwt;
 
+import com.edu.parking_api.auth.domain.AuthenticatedUser;
+import com.edu.parking_api.auth.domain.exception.InvalidAccessTokenException;
 import com.edu.parking_api.auth.domain.port.TokenProvider;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,5 +45,25 @@ public class JwtTokenProvider implements TokenProvider {
                 .expiration(Date.from(now.plus(expiration)))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    @Override
+    public AuthenticatedUser parse(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            String email = claims.get("email", String.class);
+            if (email == null || email.isBlank()) {
+                throw new InvalidAccessTokenException();
+            }
+            return new AuthenticatedUser(UUID.fromString(claims.getSubject()), email);
+        } catch (InvalidAccessTokenException ex) {
+            throw ex;
+        } catch (JwtException | IllegalArgumentException ex) {
+            throw new InvalidAccessTokenException();
+        }
     }
 }

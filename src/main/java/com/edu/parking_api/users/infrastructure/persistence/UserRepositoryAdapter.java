@@ -6,6 +6,7 @@ import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class UserRepositoryAdapter implements UserRepository {
@@ -21,6 +22,11 @@ public class UserRepositoryAdapter implements UserRepository {
         UserJpaEntity entity = UserPersistenceMapper.toJpaEntity(user);
         UserJpaEntity saved = userJpaRepository.save(entity);
         return UserPersistenceMapper.toDomain(saved);
+    }
+
+    @Override
+    public Optional<User> findById(UUID id) {
+        return userJpaRepository.findById(id).map(UserPersistenceMapper::toDomain);
     }
 
     @Override
