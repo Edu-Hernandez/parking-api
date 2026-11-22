@@ -1,7 +1,6 @@
 package com.edu.parking_api.users.infrastructure.persistence;
 
 import com.edu.parking_api.users.domain.model.User;
-import com.edu.parking_api.users.domain.normalizer.EmailNormalizer;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.springframework.stereotype.Repository;
 
@@ -32,13 +31,13 @@ public class UserRepositoryAdapter implements UserRepository {
     @Override
     public Optional<User> findByEmail(String email) {
         return userJpaRepository
-                .findByEmail(EmailNormalizer.normalize(email))
+                .findByEmail(email)
                 .map(UserPersistenceMapper::toDomain);
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return userJpaRepository.existsByEmail(email.trim().toLowerCase());
+        return userJpaRepository.existsByEmail(email);
     }
 
     @Override

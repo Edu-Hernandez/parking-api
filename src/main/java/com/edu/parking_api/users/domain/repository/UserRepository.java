@@ -11,6 +11,7 @@ public interface UserRepository {
 
     Optional<User> findById(UUID id);
 
+    // Los correos recibidos deben venir normalizados con EmailNormalizer.
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);

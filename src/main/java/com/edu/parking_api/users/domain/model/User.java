@@ -1,5 +1,7 @@
 package com.edu.parking_api.users.domain.model;
 
+import com.edu.parking_api.users.domain.normalizer.EmailNormalizer;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -39,7 +41,7 @@ public class User {
         user.documentNumber = documentNumber != null ? documentNumber.trim() : null;
         user.firstName = firstName.trim();
         user.lastName = lastName.trim();
-        user.email = email.trim().toLowerCase();
+        user.email = EmailNormalizer.normalize(email);
         user.phone = phone != null ? phone.trim() : null;
         user.passwordHash = passwordHash;
         user.active = true;
