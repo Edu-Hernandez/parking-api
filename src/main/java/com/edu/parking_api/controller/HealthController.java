@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/health")
 public class HealthController {
-    
-    @GetMapping("/health")
+
+    @GetMapping
     public String health() {
         return "Los datos de la API están funcionando correctamente";
     }

@@ -8,8 +8,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    
-    private static final String  API_PREFIX = "/api/v1";
+
+    // Prefijo de todos los @RestController. Los controladores no lo repiten.
+    public static final String API_PREFIX = "/api/v1";
 
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
