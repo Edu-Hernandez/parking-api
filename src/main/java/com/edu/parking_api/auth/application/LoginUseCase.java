@@ -1,5 +1,6 @@
 package com.edu.parking_api.auth.application;
 
+import com.edu.parking_api.auth.application.dto.AuthTokens;
 import com.edu.parking_api.auth.application.dto.LoginCommand;
 import com.edu.parking_api.auth.domain.exception.InvalidCredentialsException;
 import com.edu.parking_api.auth.domain.port.CredentialVerifier;
@@ -20,17 +21,20 @@ public class LoginUseCase {
     private final UserRepository userRepository;
     private final CredentialVerifier credentialVerifier;
     private final TokenProvider tokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     public LoginUseCase(
             UserRepository userRepository,
             CredentialVerifier credentialVerifier,
-            TokenProvider tokenProvider) {
+            TokenProvider tokenProvider,
+            RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.credentialVerifier = credentialVerifier;
         this.tokenProvider = tokenProvider;
+        this.refreshTokenService = refreshTokenService;
     }
 
-    public String execute(LoginCommand command) {
+    public AuthTokens execute(LoginCommand command) {
         String email = EmailNormalizer.normalize(command.email());
         Optional<User> user = userRepository.findByEmail(email);
 
@@ -44,6 +48,8 @@ public class LoginUseCase {
         }
 
         User authenticated = user.get();
-        return tokenProvider.issue(authenticated.getId(), authenticated.getEmail());
+        String accessToken = tokenProvider.issue(authenticated.getId(), authenticated.getEmail());
+        String refreshToken = refreshTokenService.issue(authenticated.getId());
+        return new AuthTokens(accessToken, refreshToken);
     }
 }

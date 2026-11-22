@@ -1,7 +1,7 @@
 package com.edu.parking_api.auth.infrastructure.jwt;
 
-import com.edu.parking_api.auth.domain.AuthenticatedUser;
 import com.edu.parking_api.auth.domain.exception.InvalidAccessTokenException;
+import com.edu.parking_api.auth.domain.model.AuthenticatedUser;
 import com.edu.parking_api.auth.domain.port.TokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

@@ -1,7 +1,7 @@
 package com.edu.parking_api.auth.presentation;
 
-import com.edu.parking_api.auth.domain.AuthenticatedUser;
 import com.edu.parking_api.auth.domain.exception.InvalidAccessTokenException;
+import com.edu.parking_api.auth.domain.model.AuthenticatedUser;
 import com.edu.parking_api.auth.infrastructure.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;

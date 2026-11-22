@@ -1,4 +1,4 @@
-package com.edu.parking_api.auth.domain;
+package com.edu.parking_api.auth.domain.model;
 
 import java.util.UUID;
 

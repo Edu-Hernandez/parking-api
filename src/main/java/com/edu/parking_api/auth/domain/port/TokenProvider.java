@@ -1,6 +1,6 @@
 package com.edu.parking_api.auth.domain.port;
 
-import com.edu.parking_api.auth.domain.AuthenticatedUser;
+import com.edu.parking_api.auth.domain.model.AuthenticatedUser;
 
 import java.util.UUID;
 

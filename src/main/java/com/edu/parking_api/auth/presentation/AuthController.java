@@ -2,11 +2,15 @@ package com.edu.parking_api.auth.presentation;
 
 import com.edu.parking_api.auth.application.GetCurrentUserUseCase;
 import com.edu.parking_api.auth.application.LoginUseCase;
+import com.edu.parking_api.auth.application.LogoutUseCase;
+import com.edu.parking_api.auth.application.RefreshUseCase;
+import com.edu.parking_api.auth.application.dto.AuthTokens;
 import com.edu.parking_api.auth.application.dto.LoginCommand;
-import com.edu.parking_api.auth.domain.AuthenticatedUser;
+import com.edu.parking_api.auth.domain.model.AuthenticatedUser;
+import com.edu.parking_api.auth.presentation.dto.AuthTokensResponse;
 import com.edu.parking_api.auth.presentation.dto.CurrentUserResponse;
 import com.edu.parking_api.auth.presentation.dto.LoginRequest;
-import com.edu.parking_api.auth.presentation.dto.LoginResponse;
+import com.edu.parking_api.auth.presentation.dto.RefreshTokenRequest;
 import com.edu.parking_api.users.domain.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,20 +25,40 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final LoginUseCase loginUseCase;
+    private final RefreshUseCase refreshUseCase;
+    private final LogoutUseCase logoutUseCase;
     private final GetCurrentUserUseCase getCurrentUserUseCase;
 
-    public AuthController(LoginUseCase loginUseCase, GetCurrentUserUseCase getCurrentUserUseCase) {
+    public AuthController(
+            LoginUseCase loginUseCase,
+            RefreshUseCase refreshUseCase,
+            LogoutUseCase logoutUseCase,
+            GetCurrentUserUseCase getCurrentUserUseCase) {
         this.loginUseCase = loginUseCase;
+        this.refreshUseCase = refreshUseCase;
+        this.logoutUseCase = logoutUseCase;
         this.getCurrentUserUseCase = getCurrentUserUseCase;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        String token = loginUseCase.execute(new LoginCommand(
+    public ResponseEntity<AuthTokensResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthTokens tokens = loginUseCase.execute(new LoginCommand(
                 request.getEmail(),
                 request.getPassword()
         ));
-        return ResponseEntity.ok(new LoginResponse(token));
+        return ResponseEntity.ok(toResponse(tokens));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthTokensResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthTokens tokens = refreshUseCase.execute(request.getRefreshToken());
+        return ResponseEntity.ok(toResponse(tokens));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        logoutUseCase.execute(request.getRefreshToken());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
@@ -46,5 +70,9 @@ public class AuthController {
                 user.getFirstName(),
                 user.getLastName()
         ));
+    }
+
+    private AuthTokensResponse toResponse(AuthTokens tokens) {
+        return new AuthTokensResponse(tokens.accessToken(), tokens.refreshToken());
     }
 }
