@@ -17,6 +17,7 @@ public class User {
     private String passwordHash;
     private String phone;
     private boolean active;
+    private boolean platformOwner;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -45,6 +46,7 @@ public class User {
         user.phone = phone != null ? phone.trim() : null;
         user.passwordHash = passwordHash;
         user.active = true;
+        user.platformOwner = false;
         return user;
     }
 
@@ -58,6 +60,7 @@ public class User {
             String passwordHash,
             String phone,
             boolean active,
+            boolean platformOwner,
             Instant createdAt,
             Instant updatedAt) {
         User user = new User();
@@ -70,6 +73,7 @@ public class User {
         user.passwordHash = passwordHash;
         user.phone = phone;
         user.active = active;
+        user.platformOwner = platformOwner;
         user.createdAt = createdAt;
         user.updatedAt = updatedAt;
         return user;
@@ -109,6 +113,10 @@ public class User {
 
     public boolean isActive() {
         return active;
+    }
+
+    public boolean isPlatformOwner() {
+        return platformOwner;
     }
 
     public Instant getCreatedAt() {

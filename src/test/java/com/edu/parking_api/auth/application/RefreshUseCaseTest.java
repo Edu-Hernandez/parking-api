@@ -129,6 +129,7 @@ class RefreshUseCaseTest {
                 "hash",
                 null,
                 active,
+                false,
                 Instant.now(),
                 Instant.now());
     }

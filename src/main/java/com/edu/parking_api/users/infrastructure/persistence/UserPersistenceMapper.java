@@ -17,6 +17,7 @@ final class UserPersistenceMapper {
         entity.setPasswordHash(user.getPasswordHash());
         entity.setPhone(user.getPhone());
         entity.setIsActive(user.isActive());
+        entity.setIsPlatformOwner(user.isPlatformOwner());
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
         return entity;
@@ -33,6 +34,7 @@ final class UserPersistenceMapper {
                 entity.getPasswordHash(),
                 entity.getPhone(),
                 Boolean.TRUE.equals(entity.getIsActive()),
+                Boolean.TRUE.equals(entity.getIsPlatformOwner()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );

@@ -47,6 +47,9 @@ public class UserJpaEntity {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @Column(name = "is_platform_owner", nullable = false)
+    private Boolean isPlatformOwner = false;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -137,6 +140,14 @@ public class UserJpaEntity {
 
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public Boolean getIsPlatformOwner() {
+        return isPlatformOwner;
+    }
+
+    public void setIsPlatformOwner(Boolean isPlatformOwner) {
+        this.isPlatformOwner = isPlatformOwner;
     }
 
     public Instant getCreatedAt() {
