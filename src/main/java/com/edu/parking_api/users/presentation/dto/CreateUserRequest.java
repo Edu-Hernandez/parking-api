@@ -1,5 +1,6 @@
 package com.edu.parking_api.users.presentation.dto;
 
+import com.edu.parking_api.users.application.dto.CreateUserCommand;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -32,6 +33,18 @@ public class CreateUserRequest {
     private String phone;
 
     public CreateUserRequest() {}
+
+    public CreateUserCommand toCommand() {
+        return new CreateUserCommand(
+                documentType,
+                documentNumber,
+                firstName,
+                lastName,
+                email,
+                password,
+                phone
+        );
+    }
 
     public String getDocumentType() {
         return documentType;

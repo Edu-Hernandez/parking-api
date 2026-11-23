@@ -1,7 +1,6 @@
 package com.edu.parking_api.users.presentation;
 
 import com.edu.parking_api.users.application.CreateUserUseCase;
-import com.edu.parking_api.users.application.dto.CreateUserCommand;
 import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.presentation.dto.CreateUserRequest;
 import com.edu.parking_api.users.presentation.dto.CreateUserResponse;
@@ -26,16 +25,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<CreateUserResponse> createUser(
             @Valid @RequestBody CreateUserRequest request) {
-        CreateUserCommand command = new CreateUserCommand(
-                request.getDocumentType(),
-                request.getDocumentNumber(),
-                request.getFirstName(),
-                request.getLastName(),
-                request.getEmail(),
-                request.getPassword(),
-                request.getPhone()
-        );
-        User user = createUserUseCase.execute(command);
+        User user = createUserUseCase.execute(request.toCommand());
 
         CreateUserResponse response = new CreateUserResponse(
                 user.getId(),
