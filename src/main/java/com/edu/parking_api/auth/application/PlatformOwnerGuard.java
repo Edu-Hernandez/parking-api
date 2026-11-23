@@ -20,12 +20,15 @@ public class PlatformOwnerGuard {
         this.userRepository = userRepository;
     }
 
-    public void requirePlatformOwner(UUID userId) {
-        boolean allowed = userRepository.findById(userId)
+    public boolean isPlatformOwner(UUID userId) {
+        return userRepository.findById(userId)
                 .filter(User::isActive)
                 .filter(User::isPlatformOwner)
                 .isPresent();
-        if (!allowed) {
+    }
+
+    public void requirePlatformOwner(UUID userId) {
+        if (!isPlatformOwner(userId)) {
             throw new PermissionDeniedException();
         }
     }

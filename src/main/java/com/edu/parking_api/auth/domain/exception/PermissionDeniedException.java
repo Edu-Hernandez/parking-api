@@ -9,4 +9,8 @@ public class PermissionDeniedException extends RuntimeException {
     public PermissionDeniedException() {
         super("No tienes permisos para realizar esta acción");
     }
+
+    public PermissionDeniedException(String message) {
+        super(message);
+    }
 }

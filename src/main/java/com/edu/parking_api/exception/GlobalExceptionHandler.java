@@ -39,6 +39,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidInputException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidInput(InvalidInputException ex) {
+        return error(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     // Falla de @Valid: responde los mensajes de validación por campo, sin detalles internos.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
