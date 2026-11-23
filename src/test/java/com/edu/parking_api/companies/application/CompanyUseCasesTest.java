@@ -3,6 +3,7 @@ package com.edu.parking_api.companies.application;
 import com.edu.parking_api.auth.application.PlatformOwnerGuard;
 import com.edu.parking_api.auth.domain.exception.PermissionDeniedException;
 import com.edu.parking_api.common.PageResult;
+import com.edu.parking_api.common.Paging;
 import com.edu.parking_api.companies.application.dto.CreateCompanyCommand;
 import com.edu.parking_api.companies.application.dto.UpdateCompanyCommand;
 import com.edu.parking_api.companies.domain.exception.CompanyNotFoundException;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class CompanyUseCasesTest {
@@ -166,7 +166,7 @@ class CompanyUseCasesTest {
         when(companyRepository.findAll(any(), anyInt(), anyInt())).thenReturn(page);
 
         list.execute(actorId, CompanyStatus.ACTIVE, -5, 5000);
-        verify(companyRepository).findAll(CompanyStatus.ACTIVE, 0, ListCompaniesUseCase.MAX_PAGE_SIZE);
+        verify(companyRepository).findAll(CompanyStatus.ACTIVE, 0, Paging.MAX_PAGE_SIZE);
 
         list.execute(actorId, null, 2, 0);
         verify(companyRepository).findAll(null, 2, 1);
