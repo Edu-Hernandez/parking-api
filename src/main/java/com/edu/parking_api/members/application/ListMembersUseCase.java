@@ -2,12 +2,12 @@ package com.edu.parking_api.members.application;
 
 import com.edu.parking_api.common.PageResult;
 import com.edu.parking_api.common.Paging;
+import com.edu.parking_api.companies.application.CompanyLookup;
 import com.edu.parking_api.members.application.dto.MemberDetails;
 import com.edu.parking_api.members.domain.model.CompanyMember;
 import com.edu.parking_api.members.domain.model.MemberPermissions;
 import com.edu.parking_api.members.domain.model.Role;
 import com.edu.parking_api.members.domain.repository.CompanyMemberRepository;
-import com.edu.parking_api.members.domain.repository.RoleRepository;
 import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -25,19 +25,19 @@ public class ListMembersUseCase {
     private final CompanyLookup companyLookup;
     private final CompanyMemberRepository memberRepository;
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final RoleResolver roleResolver;
 
     public ListMembersUseCase(
             CompanyPermissionGuard permissionGuard,
             CompanyLookup companyLookup,
             CompanyMemberRepository memberRepository,
             UserRepository userRepository,
-            RoleRepository roleRepository) {
+            RoleResolver roleResolver) {
         this.permissionGuard = permissionGuard;
         this.companyLookup = companyLookup;
         this.memberRepository = memberRepository;
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+        this.roleResolver = roleResolver;
     }
 
     public PageResult<MemberDetails> execute(UUID actorId, UUID companyId, int page, int size) {
@@ -51,8 +51,7 @@ public class ListMembersUseCase {
         List<UUID> userIds = members.items().stream().map(CompanyMember::getUserId).toList();
         Map<UUID, User> users = userRepository.findAllByIds(userIds).stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
-        Map<UUID, Role> roles = roleRepository.findAll().stream()
-                .collect(Collectors.toMap(Role::id, Function.identity()));
+        Map<UUID, Role> roles = roleResolver.allById();
 
         return members.map(member -> MemberDetails.of(
                 member,

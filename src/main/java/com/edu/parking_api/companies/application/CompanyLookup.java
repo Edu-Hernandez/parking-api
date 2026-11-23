@@ -1,4 +1,4 @@
-package com.edu.parking_api.members.application;
+package com.edu.parking_api.companies.application;
 
 import com.edu.parking_api.companies.domain.exception.CompanyNotActiveException;
 import com.edu.parking_api.companies.domain.exception.CompanyNotFoundException;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 /**
- * Valida la empresa sobre la que se opera, siempre después de autorizar al actor.
+ * Carga y valida la empresa sobre la que se opera, siempre después de autorizar al actor.
  */
 @Component
 public class CompanyLookup {
@@ -21,17 +21,17 @@ public class CompanyLookup {
         this.companyRepository = companyRepository;
     }
 
+    public Company get(UUID companyId) {
+        return companyRepository.findById(companyId).orElseThrow(CompanyNotFoundException::new);
+    }
+
     public void requireExists(UUID companyId) {
-        find(companyId);
+        get(companyId);
     }
 
     public void requireActive(UUID companyId) {
-        if (find(companyId).getStatus() != CompanyStatus.ACTIVE) {
+        if (get(companyId).getStatus() != CompanyStatus.ACTIVE) {
             throw new CompanyNotActiveException();
         }
-    }
-
-    private Company find(UUID companyId) {
-        return companyRepository.findById(companyId).orElseThrow(CompanyNotFoundException::new);
     }
 }

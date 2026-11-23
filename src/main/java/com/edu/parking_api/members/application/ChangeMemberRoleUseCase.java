@@ -7,7 +7,6 @@ import com.edu.parking_api.members.domain.model.CompanyMember;
 import com.edu.parking_api.members.domain.model.MemberPermissions;
 import com.edu.parking_api.members.domain.model.Role;
 import com.edu.parking_api.members.domain.repository.CompanyMemberRepository;
-import com.edu.parking_api.members.domain.repository.RoleRepository;
 import com.edu.parking_api.users.domain.exception.UserNotFoundException;
 import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.domain.repository.UserRepository;
@@ -20,19 +19,16 @@ public class ChangeMemberRoleUseCase {
 
     private final CompanyPermissionGuard permissionGuard;
     private final RoleResolver roleResolver;
-    private final RoleRepository roleRepository;
     private final CompanyMemberRepository memberRepository;
     private final UserRepository userRepository;
 
     public ChangeMemberRoleUseCase(
             CompanyPermissionGuard permissionGuard,
             RoleResolver roleResolver,
-            RoleRepository roleRepository,
             CompanyMemberRepository memberRepository,
             UserRepository userRepository) {
         this.permissionGuard = permissionGuard;
         this.roleResolver = roleResolver;
-        this.roleRepository = roleRepository;
         this.memberRepository = memberRepository;
         this.userRepository = userRepository;
     }
@@ -46,8 +42,7 @@ public class ChangeMemberRoleUseCase {
                 .orElseThrow(MemberNotFoundException::new);
 
         // Hay que poder gestionar tanto el rol actual como el nuevo.
-        Role currentRole = roleRepository.findById(member.getRoleId())
-                .orElseThrow(() -> new IllegalStateException("El rol del integrante no existe"));
+        Role currentRole = roleResolver.byId(member.getRoleId());
         Role newRole = roleResolver.resolve(command.role());
         permissionGuard.requireCanManageRole(actorId, companyId, currentRole);
         permissionGuard.requireCanManageRole(actorId, companyId, newRole);

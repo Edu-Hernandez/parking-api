@@ -1,6 +1,7 @@
 package com.edu.parking_api.members.application;
 
 import com.edu.parking_api.auth.application.PlatformOwnerGuard;
+import com.edu.parking_api.companies.application.CompanyLookup;
 import com.edu.parking_api.members.application.dto.CreateCompanyUserCommand;
 import com.edu.parking_api.members.application.dto.MemberDetails;
 import com.edu.parking_api.members.domain.model.CompanyMember;

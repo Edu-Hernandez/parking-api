@@ -1,5 +1,6 @@
 package com.edu.parking_api.members.application;
 
+import com.edu.parking_api.companies.application.CompanyLookup;
 import com.edu.parking_api.exception.BusinessException;
 import com.edu.parking_api.members.application.dto.AddMemberCommand;
 import com.edu.parking_api.members.application.dto.MemberDetails;

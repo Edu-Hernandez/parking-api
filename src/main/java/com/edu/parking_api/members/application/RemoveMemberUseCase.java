@@ -3,9 +3,7 @@ package com.edu.parking_api.members.application;
 import com.edu.parking_api.members.domain.exception.MemberNotFoundException;
 import com.edu.parking_api.members.domain.model.CompanyMember;
 import com.edu.parking_api.members.domain.model.MemberPermissions;
-import com.edu.parking_api.members.domain.model.Role;
 import com.edu.parking_api.members.domain.repository.CompanyMemberRepository;
-import com.edu.parking_api.members.domain.repository.RoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -14,15 +12,15 @@ import java.util.UUID;
 public class RemoveMemberUseCase {
 
     private final CompanyPermissionGuard permissionGuard;
-    private final RoleRepository roleRepository;
+    private final RoleResolver roleResolver;
     private final CompanyMemberRepository memberRepository;
 
     public RemoveMemberUseCase(
             CompanyPermissionGuard permissionGuard,
-            RoleRepository roleRepository,
+            RoleResolver roleResolver,
             CompanyMemberRepository memberRepository) {
         this.permissionGuard = permissionGuard;
-        this.roleRepository = roleRepository;
+        this.roleResolver = roleResolver;
         this.memberRepository = memberRepository;
     }
 
@@ -33,9 +31,7 @@ public class RemoveMemberUseCase {
         CompanyMember member = memberRepository.findByCompanyIdAndUserId(companyId, userId)
                 .orElseThrow(MemberNotFoundException::new);
 
-        Role role = roleRepository.findById(member.getRoleId())
-                .orElseThrow(() -> new IllegalStateException("El rol del integrante no existe"));
-        permissionGuard.requireCanManageRole(actorId, companyId, role);
+        permissionGuard.requireCanManageRole(actorId, companyId, roleResolver.byId(member.getRoleId()));
 
         memberRepository.delete(member);
     }

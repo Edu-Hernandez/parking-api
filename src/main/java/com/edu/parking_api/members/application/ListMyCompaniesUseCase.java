@@ -7,7 +7,6 @@ import com.edu.parking_api.members.domain.model.CompanyMember;
 import com.edu.parking_api.members.domain.model.Role;
 import com.edu.parking_api.members.domain.repository.CompanyMemberRepository;
 import com.edu.parking_api.members.domain.repository.PermissionRepository;
-import com.edu.parking_api.members.domain.repository.RoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -26,17 +25,17 @@ public class ListMyCompaniesUseCase {
 
     private final CompanyMemberRepository memberRepository;
     private final CompanyRepository companyRepository;
-    private final RoleRepository roleRepository;
+    private final RoleResolver roleResolver;
     private final PermissionRepository permissionRepository;
 
     public ListMyCompaniesUseCase(
             CompanyMemberRepository memberRepository,
             CompanyRepository companyRepository,
-            RoleRepository roleRepository,
+            RoleResolver roleResolver,
             PermissionRepository permissionRepository) {
         this.memberRepository = memberRepository;
         this.companyRepository = companyRepository;
-        this.roleRepository = roleRepository;
+        this.roleResolver = roleResolver;
         this.permissionRepository = permissionRepository;
     }
 
@@ -50,8 +49,7 @@ public class ListMyCompaniesUseCase {
                 .findAllByIds(memberships.stream().map(CompanyMember::getCompanyId).toList())
                 .stream()
                 .collect(Collectors.toMap(Company::getId, Function.identity()));
-        Map<UUID, Role> roles = roleRepository.findAll().stream()
-                .collect(Collectors.toMap(Role::id, Function.identity()));
+        Map<UUID, Role> roles = roleResolver.allById();
         Map<UUID, List<String>> permissionsByRole = permissionRepository.findCodesByRole();
 
         return memberships.stream()
