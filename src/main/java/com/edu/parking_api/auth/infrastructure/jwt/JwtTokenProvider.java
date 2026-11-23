@@ -60,8 +60,6 @@ public class JwtTokenProvider implements TokenProvider {
                 throw new InvalidAccessTokenException();
             }
             return new AuthenticatedUser(UUID.fromString(claims.getSubject()), email);
-        } catch (InvalidAccessTokenException ex) {
-            throw ex;
         } catch (JwtException | IllegalArgumentException ex) {
             throw new InvalidAccessTokenException();
         }
