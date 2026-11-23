@@ -4,6 +4,8 @@ import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +28,13 @@ public class UserRepositoryAdapter implements UserRepository {
     @Override
     public Optional<User> findById(UUID id) {
         return userJpaRepository.findById(id).map(UserPersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<User> findAllByIds(Collection<UUID> ids) {
+        return userJpaRepository.findAllById(ids).stream()
+                .map(UserPersistenceMapper::toDomain)
+                .toList();
     }
 
     @Override

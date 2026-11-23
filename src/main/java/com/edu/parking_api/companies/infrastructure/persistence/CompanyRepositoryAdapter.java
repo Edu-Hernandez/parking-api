@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,6 +36,13 @@ public class CompanyRepositoryAdapter implements CompanyRepository {
     @Override
     public Optional<Company> findById(UUID id) {
         return companyJpaRepository.findById(id).map(CompanyPersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<Company> findAllByIds(Collection<UUID> ids) {
+        return companyJpaRepository.findAllById(ids).stream()
+                .map(CompanyPersistenceMapper::toDomain)
+                .toList();
     }
 
     @Override
