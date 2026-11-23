@@ -100,9 +100,10 @@ POSTGRES_DB=parking_db
 POSTGRES_USER=parking_user
 POSTGRES_PASSWORD=tu_contraseña
 DB_PASSWORD=tu_contraseña
+JWT_SECRET=una_clave_de_al_menos_32_caracteres
 ```
 
-`POSTGRES_PASSWORD` es la clave del contenedor. `DB_PASSWORD` es la que usa la aplicación. Deben ser la misma. `.env` está en `.gitignore` y no se sube al repositorio.
+`POSTGRES_PASSWORD` es la clave del contenedor. `DB_PASSWORD` es la que usa la aplicación. Deben ser la misma. `JWT_SECRET` firma los tokens y debe tener al menos 32 caracteres; sin ella la API no arranca. `.env` está en `.gitignore` y no se sube al repositorio.
 
 ### Docker
 
@@ -134,6 +135,11 @@ spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration
 
 server.port=8080
+
+# JWT
+app.jwt.secret=${JWT_SECRET}
+app.jwt.expiration-minutes=15
+app.jwt.refresh-expiration-days=14
 ```
 
 `ddl-auto=validate` solo comprueba que las entidades coincidan con las tablas. Quien crea y cambia el esquema es Flyway. El puerto `5433` tiene que coincidir con el mapeo de `docker-compose.yml`.
@@ -151,11 +157,23 @@ En `application.properties`, `spring.jpa.hibernate.ddl-auto` pasa de `update` a 
 Si se dejara `update` junto con Flyway, los dos intentarían tocar el mismo esquema: Flyway con los `.sql` e Hibernate por su cuenta. Con `validate`, solo Flyway cambia las tablas.
 
 ### Estructura del proyecto
-```bash
-nameController → CreatenameUseCase → NameRepository (puerto)
-                                          ↑
-                              NameRepositoryAdapter → NameJpaRepository → BD
+
+Cada módulo (`auth`, `users`, `companies`, `members`) tiene las mismas capas:
+
+```text
+presentation    controllers y DTOs de entrada/salida (validación con Bean Validation)
+application     casos de uso y comandos
+domain          modelos, puertos (repositorios) y excepciones; sin dependencias de Spring
+infrastructure  entidades JPA, repositorios Spring Data, mappers y adapters
 ```
+
+```bash
+Controller → XxxUseCase → XxxRepository (puerto)
+                               ↑
+                   XxxRepositoryAdapter → XxxJpaRepository → BD
+```
+
+Todas las rutas llevan el prefijo `/api/v1`, que se define una sola vez en `WebConfig`; los controllers no lo repiten.
 
 ### Carpetas
 
@@ -188,15 +206,17 @@ src/
 
 Cuando la estructura cambie, se agrega una versión nueva. Una migración ya ejecutada no se modifica.
 
+Migraciones actuales:
+
 ```text
 migration/
-├── V1__create_initial_schema.sql
-├── V2__create_users_indexes.sql
-├── V3__add_reservation_reference.sql
-└── V4__add_company_settings.sql
+├── V1__create_initial_schema.sql        usuarios, empresas, roles y membresías
+├── V2__create_refresh_tokens.sql        sesiones con refresh token
+├── V3__add_platform_owner_to_users.sql  owner de la plataforma
+└── V4__create_permissions.sql           permisos por rol y roles privilegiados
 ```
 
-Esos nombres de `V2` en adelante son el patrón. El archivo se crea cuando exista ese cambio.
+La siguiente migración será `V5__...sql`.
 
 `V1__create_initial_schema.sql` tiene que llevar el `CREATE` del esquema inicial antes del primer arranque con Flyway. Si la API arranca con ese archivo vacío, Flyway lo marca como aplicado. El SQL ya no puede entrar en `V1`: iría en `V2__...sql`.
 
@@ -273,6 +293,62 @@ Comprueba que el proyecto compila. No arranca la API ni levanta PostgreSQL.
 - `compile` vuelve a copiar `src/main/resources` y compila `src/main/java` dentro de `target/classes`.
 
 Sirve después de cambiar código, `application.properties` o el `pom.xml` (por ejemplo, al agregar Flyway). Si termina en `BUILD SUCCESS`, el código compila. Para ejecutar la API sigue haciendo falta `./mvnw spring-boot:run`, con Docker y el `.env` cargado.
+
+## 8. API
+
+Prefijo `/api/v1`. Salvo los públicos, todos los endpoints exigen `Authorization: Bearer <token>`.
+
+| Método | Ruta | Quién puede |
+| --- | --- | --- |
+| GET | `/health` | Público |
+| POST | `/users` | Público (registro) |
+| POST | `/auth/login`, `/auth/refresh`, `/auth/logout` | Público |
+| GET | `/auth/me` | Usuario autenticado |
+| GET | `/auth/me/companies` | Usuario autenticado: sus empresas, rol y permisos |
+| GET | `/roles` | Usuario autenticado: roles y sus permisos |
+| POST | `/companies` | Owner de plataforma |
+| GET | `/companies`, `/companies/{id}` | Owner de plataforma |
+| PUT | `/companies/{id}` | Owner de plataforma |
+| POST | `/companies/{id}/deactivate` | Owner de plataforma |
+| GET | `/companies/{companyId}/members` | Permiso `MEMBERS_VIEW` |
+| POST | `/companies/{companyId}/members` | Permiso `MEMBERS_ADD` |
+| PATCH | `/companies/{companyId}/members/{userId}` | Permiso `MEMBERS_CHANGE_ROLE` |
+| DELETE | `/companies/{companyId}/members/{userId}` | Permiso `MEMBERS_REMOVE` |
+| POST | `/companies/{companyId}/users` | Owner de plataforma: crea el usuario y lo asigna a la empresa en una transacción |
+
+El login devuelve un access token de 15 minutos y un refresh token de 14 días, que se guarda hasheado y se puede revocar.
+
+### Owner de plataforma
+
+Es el único usuario que administra todas las empresas (`users.is_platform_owner`). Solo puede existir uno y **no se asigna desde la API**: se promueve a un usuario ya registrado con SQL.
+
+```bash
+docker exec -it parking-postgres psql -U parking_user -d parking_db \
+  -c "UPDATE users SET is_platform_owner = TRUE WHERE email = 'correo@ejemplo.com';"
+```
+
+### Roles y permisos de empresa
+
+Los roles (`OWNER`, `ADMIN`, `EMPLOYEE`) y lo que puede hacer cada uno viven en la base (`roles`, `permissions`, `role_permissions`), no en el código. Cambiar un permiso es un `INSERT` o `DELETE` en `role_permissions` y se aplica sin reiniciar.
+
+| Rol | Permisos de miembros |
+| --- | --- |
+| `ADMIN` | `MEMBERS_VIEW`, `MEMBERS_ADD`, `MEMBERS_CHANGE_ROLE`, `MEMBERS_REMOVE` |
+| `OWNER` | Ninguno por defecto |
+| `EMPLOYEE` | Ninguno |
+
+- Los roles privilegiados (`OWNER`) solo los gestiona quien tenga `MEMBERS_MANAGE_PRIVILEGED`; hoy nadie lo tiene salvo el owner de plataforma, que no necesita permisos.
+- Nadie puede modificar ni retirar su propia membresía (403).
+- Un usuario puede pertenecer a varias empresas con roles distintos.
+
+## 9. Pruebas
+
+```bash
+set -a; source .env; set +a
+./mvnw test
+```
+
+Las pruebas unitarias no necesitan base de datos. `ParkingApiApplicationTests` arranca el contexto completo, por eso necesita Docker y el `.env` cargado. Los objetos de dominio de las pruebas salen de `src/test/.../support/Fixtures.java`.
 
 ## Referencias
 
