@@ -1,12 +1,12 @@
 package com.edu.parking_api.auth.application;
 
 import com.edu.parking_api.auth.domain.exception.PermissionDeniedException;
+import com.edu.parking_api.support.Fixtures;
 import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,19 +57,6 @@ class PlatformOwnerGuardTest {
     }
 
     private User user(boolean active, boolean platformOwner) {
-        return User.reconstitute(
-                userId,
-                "DNI",
-                "12345678",
-                "Ana",
-                "Pérez",
-                "ana@example.com",
-                "hash",
-                null,
-                active,
-                platformOwner,
-                Instant.now(),
-                Instant.now()
-        );
+        return Fixtures.user(userId, active, platformOwner);
     }
 }

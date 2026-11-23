@@ -2,6 +2,7 @@ package com.edu.parking_api.members.application;
 
 import com.edu.parking_api.auth.application.PlatformOwnerGuard;
 import com.edu.parking_api.auth.domain.exception.PermissionDeniedException;
+import com.edu.parking_api.companies.application.CompanyLookup;
 import com.edu.parking_api.companies.domain.exception.CompanyNotActiveException;
 import com.edu.parking_api.companies.domain.model.Company;
 import com.edu.parking_api.companies.domain.model.CompanyStatus;
@@ -13,6 +14,7 @@ import com.edu.parking_api.members.domain.model.CompanyMember;
 import com.edu.parking_api.members.domain.model.Role;
 import com.edu.parking_api.members.domain.repository.CompanyMemberRepository;
 import com.edu.parking_api.members.domain.repository.RoleRepository;
+import com.edu.parking_api.support.Fixtures;
 import com.edu.parking_api.users.application.CreateUserUseCase;
 import com.edu.parking_api.users.application.dto.CreateUserCommand;
 import com.edu.parking_api.users.domain.model.User;
@@ -20,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -111,11 +112,10 @@ class CreateCompanyUserUseCaseTest {
     }
 
     private Company company(CompanyStatus status) {
-        return Company.reconstitute(companyId, "Cocheras SA", null, null, null, status, Instant.now(), Instant.now());
+        return Fixtures.company(companyId, "Cocheras SA", status);
     }
 
     private User newUser() {
-        return User.reconstitute(newUserId, "DNI", "12345678", "Ana", "Pérez", "ana@cliente.com",
-                "hash", null, true, false, Instant.now(), Instant.now());
+        return Fixtures.user(newUserId, "ana@cliente.com", true, false);
     }
 }

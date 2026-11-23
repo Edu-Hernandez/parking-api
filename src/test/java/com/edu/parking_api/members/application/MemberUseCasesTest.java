@@ -4,6 +4,7 @@ import com.edu.parking_api.auth.application.PlatformOwnerGuard;
 import com.edu.parking_api.auth.domain.exception.PermissionDeniedException;
 import com.edu.parking_api.common.PageResult;
 import com.edu.parking_api.common.Paging;
+import com.edu.parking_api.companies.application.CompanyLookup;
 import com.edu.parking_api.companies.domain.exception.CompanyNotActiveException;
 import com.edu.parking_api.companies.domain.exception.CompanyNotFoundException;
 import com.edu.parking_api.companies.domain.model.Company;
@@ -24,6 +25,7 @@ import com.edu.parking_api.members.domain.model.Role;
 import com.edu.parking_api.members.domain.repository.CompanyMemberRepository;
 import com.edu.parking_api.members.domain.repository.PermissionRepository;
 import com.edu.parking_api.members.domain.repository.RoleRepository;
+import com.edu.parking_api.support.Fixtures;
 import com.edu.parking_api.users.domain.exception.UserNotFoundException;
 import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.domain.repository.UserRepository;
@@ -76,10 +78,10 @@ class MemberUseCasesTest {
         RoleResolver roleResolver = new RoleResolver(roleRepository);
 
         add = new AddMemberUseCase(guard, companyLookup, roleResolver, memberRepository, userRepository);
-        changeRole = new ChangeMemberRoleUseCase(guard, roleResolver, roleRepository, memberRepository, userRepository);
-        remove = new RemoveMemberUseCase(guard, roleRepository, memberRepository);
-        list = new ListMembersUseCase(guard, companyLookup, memberRepository, userRepository, roleRepository);
-        listMyCompanies = new ListMyCompaniesUseCase(memberRepository, companyRepository, roleRepository, permissionRepository);
+        changeRole = new ChangeMemberRoleUseCase(guard, roleResolver, memberRepository, userRepository);
+        remove = new RemoveMemberUseCase(guard, roleResolver, memberRepository);
+        list = new ListMembersUseCase(guard, companyLookup, memberRepository, userRepository, roleResolver);
+        listMyCompanies = new ListMyCompaniesUseCase(memberRepository, companyRepository, roleResolver, permissionRepository);
         listRoles = new ListRolesUseCase(roleRepository, permissionRepository);
 
         for (Role role : List.of(admin, employee, owner)) {
@@ -366,15 +368,14 @@ class MemberUseCasesTest {
     }
 
     private Company company(CompanyStatus status) {
-        return Company.reconstitute(companyId, "Cocheras SA", null, null, null, status, Instant.now(), Instant.now());
+        return Fixtures.company(companyId, "Cocheras SA", status);
     }
 
     private Company company(UUID id, String name) {
-        return Company.reconstitute(id, name, null, null, null, CompanyStatus.ACTIVE, Instant.now(), Instant.now());
+        return Fixtures.company(id, name, CompanyStatus.ACTIVE);
     }
 
     private User user(UUID id, boolean active) {
-        return User.reconstitute(id, "DNI", "12345678", "Ana", "Pérez", "ana@example.com",
-                "hash", null, active, false, Instant.now(), Instant.now());
+        return Fixtures.user(id, active, false);
     }
 }

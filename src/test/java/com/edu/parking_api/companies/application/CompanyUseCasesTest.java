@@ -43,9 +43,10 @@ class CompanyUseCasesTest {
         when(companyRepository.save(any(Company.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         create = new CreateCompanyUseCase(companyRepository, guard);
-        update = new UpdateCompanyUseCase(companyRepository, guard);
-        deactivate = new DeactivateCompanyUseCase(companyRepository, guard);
-        get = new GetCompanyUseCase(companyRepository, guard);
+        CompanyLookup companyLookup = new CompanyLookup(companyRepository);
+        update = new UpdateCompanyUseCase(companyRepository, companyLookup, guard);
+        deactivate = new DeactivateCompanyUseCase(companyRepository, companyLookup, guard);
+        get = new GetCompanyUseCase(companyLookup, guard);
         list = new ListCompaniesUseCase(companyRepository, guard);
     }
 

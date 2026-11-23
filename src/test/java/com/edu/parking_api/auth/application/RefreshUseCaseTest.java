@@ -5,6 +5,7 @@ import com.edu.parking_api.auth.domain.exception.InvalidRefreshTokenException;
 import com.edu.parking_api.auth.domain.model.RefreshToken;
 import com.edu.parking_api.auth.domain.port.TokenProvider;
 import com.edu.parking_api.auth.domain.repository.RefreshTokenRepository;
+import com.edu.parking_api.support.Fixtures;
 import com.edu.parking_api.users.domain.model.User;
 import com.edu.parking_api.users.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -119,19 +120,7 @@ class RefreshUseCaseTest {
     }
 
     private User user(boolean active) {
-        return User.reconstitute(
-                userId,
-                "DNI",
-                "12345678",
-                "Ana",
-                "Pérez",
-                "ana@example.com",
-                "hash",
-                null,
-                active,
-                false,
-                Instant.now(),
-                Instant.now());
+        return Fixtures.user(userId, active, false);
     }
 
     /** Repositorio en memoria para aislar la lógica de negocio de JPA. */
