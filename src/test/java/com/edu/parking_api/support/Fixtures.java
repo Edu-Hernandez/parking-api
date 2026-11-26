@@ -2,6 +2,8 @@ package com.edu.parking_api.support;
 
 import com.edu.parking_api.companies.domain.model.Company;
 import com.edu.parking_api.companies.domain.model.CompanyStatus;
+import com.edu.parking_api.parkings.domain.model.Parking;
+import com.edu.parking_api.parkings.domain.model.ParkingStatus;
 import com.edu.parking_api.users.domain.model.User;
 
 import java.time.Instant;
@@ -28,5 +30,10 @@ public final class Fixtures {
 
     public static Company company(UUID id, String name, CompanyStatus status) {
         return Company.reconstitute(id, name, null, null, null, status, Instant.now(), Instant.now());
+    }
+
+    public static Parking parking(UUID id, UUID companyId, String name, ParkingStatus status) {
+        return Parking.reconstitute(id, companyId, name, null, "Av. Principal 123", null, null, null,
+                Parking.DEFAULT_TIMEZONE, status, Instant.now(), Instant.now());
     }
 }
