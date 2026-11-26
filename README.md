@@ -158,7 +158,7 @@ Si se dejara `update` junto con Flyway, los dos intentarían tocar el mismo esqu
 
 ### Estructura del proyecto
 
-Cada módulo (`auth`, `users`, `companies`, `members`) tiene las mismas capas:
+Cada módulo (`auth`, `users`, `companies`, `members`, `parkings`) tiene las mismas capas:
 
 ```text
 presentation    controllers y DTOs de entrada/salida (validación con Bean Validation)
@@ -213,10 +213,11 @@ migration/
 ├── V1__create_initial_schema.sql        usuarios, empresas, roles y membresías
 ├── V2__create_refresh_tokens.sql        sesiones con refresh token
 ├── V3__add_platform_owner_to_users.sql  owner de la plataforma
-└── V4__create_permissions.sql           permisos por rol y roles privilegiados
+├── V4__create_permissions.sql           permisos por rol y roles privilegiados
+└── V5__create_parking_permissions.sql   permisos de estacionamientos (PARKINGS_*)
 ```
 
-La siguiente migración será `V5__...sql`.
+La siguiente migración será `V6__...sql`.
 
 `V1__create_initial_schema.sql` tiene que llevar el `CREATE` del esquema inicial antes del primer arranque con Flyway. Si la API arranca con ese archivo vacío, Flyway lo marca como aplicado. El SQL ya no puede entrar en `V1`: iría en `V2__...sql`.
 
@@ -315,6 +316,12 @@ Prefijo `/api/v1`. Salvo los públicos, todos los endpoints exigen `Authorizatio
 | PATCH | `/companies/{companyId}/members/{userId}` | Permiso `MEMBERS_CHANGE_ROLE` |
 | DELETE | `/companies/{companyId}/members/{userId}` | Permiso `MEMBERS_REMOVE` |
 | POST | `/companies/{companyId}/users` | Owner de plataforma: crea el usuario y lo asigna a la empresa en una transacción |
+| POST | `/companies/{companyId}/parkings` | Permiso `PARKINGS_CREATE` (empresa activa) |
+| GET | `/companies/{companyId}/parkings` | Permiso `PARKINGS_VIEW`; filtro opcional `?status=ACTIVE\|INACTIVE` |
+| GET | `/companies/{companyId}/parkings/{parkingId}` | Permiso `PARKINGS_VIEW` |
+| PUT | `/companies/{companyId}/parkings/{parkingId}` | Permiso `PARKINGS_UPDATE` (empresa activa) |
+| POST | `/companies/{companyId}/parkings/{parkingId}/deactivate` | Permiso `PARKINGS_CHANGE_STATUS` |
+| POST | `/companies/{companyId}/parkings/{parkingId}/activate` | Permiso `PARKINGS_CHANGE_STATUS` (empresa activa) |
 
 El login devuelve un access token de 15 minutos y un refresh token de 14 días, que se guarda hasheado y se puede revocar.
 
@@ -331,11 +338,11 @@ docker exec -it parking-postgres psql -U parking_user -d parking_db \
 
 Los roles (`OWNER`, `ADMIN`, `EMPLOYEE`) y lo que puede hacer cada uno viven en la base (`roles`, `permissions`, `role_permissions`), no en el código. Cambiar un permiso es un `INSERT` o `DELETE` en `role_permissions` y se aplica sin reiniciar.
 
-| Rol | Permisos de miembros |
-| --- | --- |
-| `ADMIN` | `MEMBERS_VIEW`, `MEMBERS_ADD`, `MEMBERS_CHANGE_ROLE`, `MEMBERS_REMOVE` |
-| `OWNER` | Ninguno por defecto |
-| `EMPLOYEE` | Ninguno |
+| Rol | Permisos de miembros | Permisos de estacionamientos |
+| --- | --- | --- |
+| `ADMIN` | `MEMBERS_VIEW`, `MEMBERS_ADD`, `MEMBERS_CHANGE_ROLE`, `MEMBERS_REMOVE` | `PARKINGS_VIEW`, `PARKINGS_CREATE`, `PARKINGS_UPDATE`, `PARKINGS_CHANGE_STATUS` |
+| `OWNER` | Ninguno por defecto | Ninguno por defecto |
+| `EMPLOYEE` | Ninguno | `PARKINGS_VIEW` |
 
 - Los roles privilegiados (`OWNER`) solo los gestiona quien tenga `MEMBERS_MANAGE_PRIVILEGED`; hoy nadie lo tiene salvo el owner de plataforma, que no necesita permisos.
 - Nadie puede modificar ni retirar su propia membresía (403).
